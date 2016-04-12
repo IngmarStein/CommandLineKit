@@ -18,6 +18,6 @@ if [ ! -f "${XCTEST_SNAPSHOT}.tar.gz" ]; then
 fi
 tar -zxvf "${XCTEST_SNAPSHOT}.tar.gz"
 cd "swift-corelibs-xctest-${XCTEST_SNAPSHOT}"
-sudo ./build_script.py --swiftc="/swift/usr/bin/swiftc" --build-dir="/tmp/XCTest_build" --swift-build-dir="/swift/usr" --library-install-path="/swift/usr/lib/swift/linux" --module-install-path="/swift/usr/lib/swift/linux/x86_64" --arch x86_64
+sudo ./build_script.py --swiftc="/swift/usr/bin/swiftc" --build-dir="/tmp/XCTest_build" --foundation-build-dir="/swift/usr/lib/swift/linux" --library-install-path="/swift/usr/lib/swift/linux" --module-install-path="/swift/usr/lib/swift/linux/x86_64"
 cd ..
 rm -rf "swift-corelibs-xctest-${XCTEST_SNAPSHOT}"
