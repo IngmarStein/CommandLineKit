@@ -29,10 +29,17 @@ internal extension String {
   private func _localDecimalPoint() -> Character {
     let locale = localeconv()
     if locale != nil {
-      let decimalPoint = locale.memory.decimal_point
-      if decimalPoint != nil {
-        return Character(UnicodeScalar(UInt32(decimalPoint.memory)))
-      }
+      #if swift(>=3.0)
+        let decimalPoint = locale.pointee.decimal_point
+        if decimalPoint != nil {
+          return Character(UnicodeScalar(UInt32(decimalPoint.pointee)))
+        }
+      #else
+        let decimalPoint = locale.memory.decimal_point
+        if decimalPoint != nil {
+          return Character(UnicodeScalar(UInt32(decimalPoint.memory)))
+        }
+      #endif
     }
 
     return "."
@@ -50,7 +57,12 @@ internal extension String {
     var isNegative: Bool = false
     let decimalPoint = self._localDecimalPoint()
 
-    for (i, c) in self.characters.enumerate() {
+    #if swift(>=3.0)
+      let charactersEnumerator = self.characters.enumerated()
+    #else
+      let charactersEnumerator = self.characters.enumerate()
+    #endif
+    for (i, c) in charactersEnumerator {
       if i == 0 && c == "-" {
         isNegative = true
         continue

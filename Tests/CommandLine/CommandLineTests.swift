@@ -886,7 +886,12 @@ internal class CommandLineTests: XCTestCase {
       XCTAssertTrue(o[0].hasPrefix("[ERROR]"))
       XCTAssertTrue(o[1].hasPrefix("[ABOUT]"))
 
-      for i in 2.stride(to: opts.count, by: 2) {
+      #if swift(>=3.0)
+        let range = stride(from: 2, to: opts.count, by: 2)
+      #else
+        let range = 2.stride(to: opts.count, by: 2)
+      #endif
+      for i in range {
         XCTAssertTrue(o[i].hasPrefix("[FLAG]"))
         XCTAssertTrue(o[i + 1].hasPrefix("[HELP]"))
       }

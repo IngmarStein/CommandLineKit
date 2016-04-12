@@ -31,18 +31,33 @@ public class Option {
 
   public var claimedValues: Int { return 0 }
 
-  public var flagDescription: String {
-    switch (shortFlag, longFlag) {
-    case let (.Some(sf), .Some(lf)):
-      return "\(ShortOptionPrefix)\(sf), \(LongOptionPrefix)\(lf)"
-    case (.None, let .Some(lf)):
-      return "\(LongOptionPrefix)\(lf)"
-    case (let .Some(sf), .None):
-      return "\(ShortOptionPrefix)\(sf)"
-    default:
-      return ""
+  #if swift(>=3.0)
+    public var flagDescription: String {
+      switch (shortFlag, longFlag) {
+      case let (.some(sf), .some(lf)):
+        return "\(ShortOptionPrefix)\(sf), \(LongOptionPrefix)\(lf)"
+      case (.none, let .some(lf)):
+        return "\(LongOptionPrefix)\(lf)"
+      case (let .some(sf), .none):
+        return "\(ShortOptionPrefix)\(sf)"
+      default:
+        return ""
+      }
     }
-  }
+  #else
+    public var flagDescription: String {
+      switch (shortFlag, longFlag) {
+      case let (.Some(sf), .Some(lf)):
+        return "\(ShortOptionPrefix)\(sf), \(LongOptionPrefix)\(lf)"
+      case (.None, let .Some(lf)):
+        return "\(LongOptionPrefix)\(lf)"
+      case (let .Some(sf), .None):
+        return "\(ShortOptionPrefix)\(sf)"
+      default:
+        return ""
+      }
+    }
+  #endif
   
   private init(_ shortFlag: String?, _ longFlag: String?, _ required: Bool, _ helpMessage: String) {
     if let sf = shortFlag {

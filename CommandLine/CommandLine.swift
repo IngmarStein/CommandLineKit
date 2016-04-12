@@ -36,12 +36,21 @@ let ArgumentStopper = "--"
 let ArgumentAttacher: Character = "="
 
 /* An output stream to stderr; used by CommandLine.printUsage(). */
-private struct StderrOutputStream: OutputStreamType {
-  static let stream = StderrOutputStream()
-  func write(s: String) {
-    fputs(s, stderr)
+#if swift(>=3.0)
+  private struct StderrOutputStream: OutputStream {
+    static let stream = StderrOutputStream()
+    func write(s: String) {
+      fputs(s, stderr)
+    }
   }
-}
+#else
+  private struct StderrOutputStream: OutputStreamType {
+    static let stream = StderrOutputStream()
+    func write(s: String) {
+      fputs(s, stderr)
+    }
+  }
+#endif
 
 /**
  * The CommandLine class implements a command-line interface for your app.
@@ -129,7 +138,11 @@ public class CommandLine {
    */
   public var maxFlagDescriptionWidth: Int {
     if _maxFlagDescriptionWidth == 0 {
-      _maxFlagDescriptionWidth = _options.map { $0.flagDescription.characters.count }.sort().first ?? 0
+      #if swift(>=3.0)
+        _maxFlagDescriptionWidth = _options.map { $0.flagDescription.characters.count }.sorted().first ?? 0
+      #else
+        _maxFlagDescriptionWidth = _options.map { $0.flagDescription.characters.count }.sort().first ?? 0
+      #endif
     }
 
     return _maxFlagDescriptionWidth
@@ -155,28 +168,53 @@ public class CommandLine {
   }
 
   /** A ParseError is thrown if the `parse()` method fails. */
-  public enum ParseError: ErrorType, CustomStringConvertible {
-    /** Thrown if an unrecognized argument is passed to `parse()` in strict mode */
-    case InvalidArgument(String)
+  #if swift(>=3.0)
+    public enum ParseError: ErrorProtocol, CustomStringConvertible {
+      /** Thrown if an unrecognized argument is passed to `parse()` in strict mode */
+      case InvalidArgument(String)
 
-    /** Thrown if the value for an Option is invalid (e.g. a string is passed to an IntOption) */
-    case InvalidValueForOption(Option, [String])
-    
-    /** Thrown if an Option with required: true is missing */
-    case MissingRequiredOptions([Option])
-    
-    public var description: String {
-      switch self {
-      case let .InvalidArgument(arg):
-        return "Invalid argument: \(arg)"
-      case let .InvalidValueForOption(opt, vals):
-        let vs = vals.joinWithSeparator(", ")
-        return "Invalid value(s) for option \(opt.flagDescription): \(vs)"
-      case let .MissingRequiredOptions(opts):
-        return "Missing required options: \(opts.map { return $0.flagDescription })"
+      /** Thrown if the value for an Option is invalid (e.g. a string is passed to an IntOption) */
+      case InvalidValueForOption(Option, [String])
+      
+      /** Thrown if an Option with required: true is missing */
+      case MissingRequiredOptions([Option])
+      
+      public var description: String {
+        switch self {
+        case let .InvalidArgument(arg):
+          return "Invalid argument: \(arg)"
+        case let .InvalidValueForOption(opt, vals):
+          let vs = vals.joined(separator: ", ")
+          return "Invalid value(s) for option \(opt.flagDescription): \(vs)"
+        case let .MissingRequiredOptions(opts):
+          return "Missing required options: \(opts.map { return $0.flagDescription })"
+        }
       }
     }
-  }
+  #else
+    public enum ParseError: ErrorType, CustomStringConvertible {
+      /** Thrown if an unrecognized argument is passed to `parse()` in strict mode */
+      case InvalidArgument(String)
+
+      /** Thrown if the value for an Option is invalid (e.g. a string is passed to an IntOption) */
+      case InvalidValueForOption(Option, [String])
+      
+      /** Thrown if an Option with required: true is missing */
+      case MissingRequiredOptions([Option])
+      
+      public var description: String {
+        switch self {
+        case let .InvalidArgument(arg):
+          return "Invalid argument: \(arg)"
+        case let .InvalidValueForOption(opt, vals):
+          let vs = vals.joinWithSeparator(", ")
+          return "Invalid value(s) for option \(opt.flagDescription): \(vs)"
+        case let .MissingRequiredOptions(opts):
+          return "Missing required options: \(opts.map { return $0.flagDescription })"
+        }
+      }
+    }
+  #endif
   
   /**
    * Initializes a CommandLine object.
@@ -202,7 +240,12 @@ public class CommandLine {
       args.append(a)
     }
 
-    for i in (flagIndex + 1).stride(to: _arguments.count, by: 1) {
+    #if swift(>=3.0)
+      let range = stride(from: flagIndex + 1, to: _arguments.count, by :1)
+    #else
+      let range = (flagIndex + 1).stride(to: _arguments.count, by: 1)
+    #endif
+    for i in range {
       if !skipFlagChecks {
         if _arguments[i] == ArgumentStopper {
           skipFlagChecks = true
@@ -295,7 +338,12 @@ public class CommandLine {
     /* Nuke executable name */
     strays[0] = ""
 
-    for (idx, arg) in _arguments.enumerate() {
+    #if swift(>=3.0)
+      let argumentsEnumerator = _arguments.enumerated()
+    #else
+      let argumentsEnumerator = _arguments.enumerate()
+    #endif
+    for (idx, arg) in argumentsEnumerator {
       if arg == ArgumentStopper {
         break
       }
@@ -306,7 +354,11 @@ public class CommandLine {
       
       let skipChars = arg.hasPrefix(LongOptionPrefix) ?
         LongOptionPrefix.characters.count : ShortOptionPrefix.characters.count
-      let flagWithArg = arg[arg.startIndex.advancedBy(skipChars)..<arg.endIndex]
+      #if swift(>=3.0)
+        let flagWithArg = arg[arg.startIndex.advanced(by: skipChars)..<arg.endIndex]
+      #else
+        let flagWithArg = arg[arg.startIndex.advancedBy(skipChars)..<arg.endIndex]
+      #endif
       
       /* The argument contained nothing but ShortOptionPrefix or LongOptionPrefix */
       if flagWithArg.isEmpty {
@@ -327,9 +379,15 @@ public class CommandLine {
 
         var claimedIdx = idx + option.claimedValues
         if attachedArg != nil { claimedIdx -= 1 }
-        for i in idx.stride(through: claimedIdx, by: 1) {
-          strays[i] = ""
-        }
+        #if swift(>=3.0)
+          for i in stride(from: idx, through: claimedIdx, by: 1) {
+            strays[i] = ""
+          }
+        #else
+          for i in idx.stride(through: claimedIdx, by: 1) {
+            strays[i] = ""
+          }
+        #endif
 
         flagMatched = true
         break
@@ -338,7 +396,12 @@ public class CommandLine {
       /* Flags that do not take any arguments can be concatenated */
       let flagLength = flag.characters.count
       if !flagMatched && !arg.hasPrefix(LongOptionPrefix) {
-        for (i, c) in flag.characters.enumerate() {
+        #if swift(>=3.0)
+          let flagCharactersEnumerator = flag.characters.enumerated()
+        #else
+          let flagCharactersEnumerator = flag.characters.enumerate()
+        #endif
+        for (i, c) in flagCharactersEnumerator {
           for option in _options where option.flagMatch(String(c)) {
             /* Values are allowed at the end of the concatenated flags, e.g.
             * -xvf <file1> <file2>
@@ -350,10 +413,16 @@ public class CommandLine {
 
             var claimedIdx = idx + option.claimedValues
             if attachedArg != nil { claimedIdx -= 1 }
-            for i in idx.stride(through: claimedIdx, by: 1) {
-              strays[i] = ""
-            }
-            
+            #if swift(>=3.0)
+              for i in stride(from: idx, through: claimedIdx, by: 1) {
+                strays[i] = ""
+              }
+            #else
+              for i in idx.stride(through: claimedIdx, by: 1) {
+                strays[i] = ""
+              }
+            #endif
+
             flagMatched = true
             break
           }
@@ -406,18 +475,33 @@ public class CommandLine {
    * 
    * - parameter to: An OutputStreamType to write the error message to.
    */
-  public func printUsage<TargetStream: OutputStreamType>(inout to: TargetStream) {
-    /* Nil coalescing operator (??) doesn't work on closures :( */
-    let format = formatOutput != nil ? formatOutput! : defaultFormat
+  #if swift(>=3.0)
+    public func printUsage<TargetStream: OutputStream>(to: inout TargetStream) {
+      /* Nil coalescing operator (??) doesn't work on closures :( */
+      let format = formatOutput != nil ? formatOutput! : defaultFormat
 
-    let name = _arguments[0]
-    print(format("Usage: \(name) [options]", .About), terminator: "", toStream: &to)
+      let name = _arguments[0]
+      print(format("Usage: \(name) [options]", .About), terminator: "", to: &to)
 
-    for opt in _options {
-      print(format(opt.flagDescription, .OptionFlag), terminator: "", toStream: &to)
-      print(format(opt.helpMessage, .OptionHelp), terminator: "", toStream: &to)
+      for opt in _options {
+        print(format(opt.flagDescription, .OptionFlag), terminator: "", to: &to)
+        print(format(opt.helpMessage, .OptionHelp), terminator: "", to: &to)
+      }
     }
-  }
+  #else
+    public func printUsage<TargetStream: OutputStreamType>(inout to: TargetStream) {
+      /* Nil coalescing operator (??) doesn't work on closures :( */
+      let format = formatOutput != nil ? formatOutput! : defaultFormat
+
+      let name = _arguments[0]
+      print(format("Usage: \(name) [options]", .About), terminator: "", toStream: &to)
+
+      for opt in _options {
+        print(format(opt.flagDescription, .OptionFlag), terminator: "", toStream: &to)
+        print(format(opt.helpMessage, .OptionHelp), terminator: "", toStream: &to)
+      }
+    }
+  #endif
   
   /**
    * Prints a usage message.
@@ -426,22 +510,37 @@ public class CommandLine {
    *   (e.g. "Missing required option --extract") will be printed before the usage message.
    * - parameter to: An OutputStreamType to write the error message to.
    */
-  public func printUsage<TargetStream: OutputStreamType>(error: ErrorType, inout to: TargetStream) {
-    let format = formatOutput != nil ? formatOutput! : defaultFormat
-    print(format("\(error)", .Error), terminator: "", toStream: &to)
-    printUsage(&to)
-  }
-  
+  #if swift(>=3.0)
+    public func printUsage<TargetStream: OutputStream>(error: ErrorProtocol, to: inout TargetStream) {
+      let format = formatOutput != nil ? formatOutput! : defaultFormat
+      print(format("\(error)", .Error), terminator: "", to: &to)
+      printUsage(&to)
+    }
+  #else
+    public func printUsage<TargetStream: OutputStreamType>(error: ErrorType, inout to: TargetStream) {
+      let format = formatOutput != nil ? formatOutput! : defaultFormat
+      print(format("\(error)", .Error), terminator: "", toStream: &to)
+      printUsage(&to)
+    }
+  #endif
+
   /**
    * Prints a usage message.
    *
    * - parameter error: An error thrown from `parse()`. A description of the error
    *   (e.g. "Missing required option --extract") will be printed before the usage message.
    */
-  public func printUsage(error: ErrorType) {
-    var out = StderrOutputStream.stream
-    printUsage(error, to: &out)
-  }
+  #if swift(>=3.0)
+    public func printUsage(error: ErrorProtocol) {
+      var out = StderrOutputStream.stream
+      printUsage(error, to: &out)
+    }
+  #else
+    public func printUsage(error: ErrorType) {
+      var out = StderrOutputStream.stream
+      printUsage(error, to: &out)
+    }
+  #endif
   
   /**
    * Prints a usage message.
