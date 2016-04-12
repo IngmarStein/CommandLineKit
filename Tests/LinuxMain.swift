@@ -18,4 +18,4 @@
 import XCTest
 @testable import CommandLineTestSuite
 
-XCTMain([CommandLineTests(), StringExtensionTests()])
+XCTMain([testCase(CommandLineTests.allTests), testCase(StringExtensionTests.allTests)])
