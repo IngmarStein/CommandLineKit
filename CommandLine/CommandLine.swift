@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import Foundation
 /* Required for setlocale(3) */
 #if os(OSX)
   import Darwin

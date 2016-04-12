@@ -16,6 +16,7 @@
  */
 
 import XCTest
+import Foundation
 @testable import CommandLine
 #if os(OSX)
   import Darwin
