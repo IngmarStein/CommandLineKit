@@ -699,7 +699,11 @@ internal class CommandLineTests: XCTestCase {
     }
 
     do {
-      try cli.parse(true)
+      #if swift(>=3.0)
+        try cli.parse(strict: true)
+      #else
+        try cli.parse(true)
+      #endif
       XCTFail("Successfully parsed invalid flags in strict mode")
     } catch let CommandLine.ParseError.InvalidArgument(arg) {
       XCTAssertEqual(arg, "--invalid", "Incorrect argument identified in InvalidArgument: \(arg)")
@@ -739,7 +743,11 @@ internal class CommandLineTests: XCTestCase {
       o4.reset()
       cli.addOptions(o1, o2, o3, o4, o5, o6, o7)
 
-      try cli.parse(true)
+      #if swift(>=3.0)
+        try cli.parse(strict: true)
+      #else
+        try cli.parse(true)
+      #endif
       XCTAssertTrue(o1.value, "Failed to set bool option with stray values")
       XCTAssertEqual(o2.value!, "green", "Incorrect value for string option with stray values")
       XCTAssertTrue(o3.value, "Failed to set combined bool option with stray values")

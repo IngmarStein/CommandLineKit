@@ -93,7 +93,16 @@ public class Option {
   public convenience init(longFlag: String, required: Bool = false, helpMessage: String) {
     self.init(nil, longFlag as String?, required, helpMessage)
   }
+
+  #if swift(>=3.0)
+  func flagMatch(_ flag: String) -> Bool {
+    return flag == shortFlag || flag == longFlag
+  }
   
+  func setValue(_ values: [String]) -> Bool {
+    return false
+  }
+  #else
   func flagMatch(flag: String) -> Bool {
     return flag == shortFlag || flag == longFlag
   }
@@ -101,6 +110,7 @@ public class Option {
   func setValue(values: [String]) -> Bool {
     return false
   }
+  #endif
 }
 
 /**
@@ -113,15 +123,22 @@ public class BoolOption: Option {
   public var value: Bool {
     return _value
   }
-  
+
   override public var wasSet: Bool {
     return _value
   }
-  
+
+  #if swift(>=3.0)
+  override func setValue(_ values: [String]) -> Bool {
+    _value = true
+    return true
+  }
+  #else
   override func setValue(values: [String]) -> Bool {
     _value = true
     return true
   }
+  #endif
 }
 
 /**  An option that accepts a positive or negative integer value. */
@@ -140,6 +157,20 @@ public class IntOption: Option {
     return _value != nil ? 1 : 0
   }
 
+  #if swift(>=3.0)
+  override func setValue(_ values: [String]) -> Bool {
+    if values.count == 0 {
+      return false
+    }
+
+    if let val = Int(values[0]) {
+      _value = val
+      return true
+    }
+
+    return false
+  }
+  #else
   override func setValue(values: [String]) -> Bool {
     if values.count == 0 {
       return false
@@ -152,6 +183,7 @@ public class IntOption: Option {
     
     return false
   }
+  #endif
 }
 
 /**
@@ -172,11 +204,18 @@ public class CounterOption: Option {
   public func reset() {
     _value = 0
   }
-  
+
+  #if swift(>=3.0)
+  override func setValue(_ values: [String]) -> Bool {
+    _value += 1
+    return true
+  }
+  #else
   override func setValue(values: [String]) -> Bool {
     _value += 1
     return true
   }
+  #endif
 }
 
 /**  An option that accepts a positive or negative floating-point value. */
@@ -195,6 +234,23 @@ public class DoubleOption: Option {
     return _value != nil ? 1 : 0
   }
 
+  #if swift(>=3.0)
+
+  override func setValue(_ values: [String]) -> Bool {
+    if values.count == 0 {
+      return false
+    }
+
+    if let val = values[0].toDouble() {
+      _value = val
+      return true
+    }
+
+    return false
+  }
+
+  #else
+
   override func setValue(values: [String]) -> Bool {
     if values.count == 0 {
       return false
@@ -207,6 +263,8 @@ public class DoubleOption: Option {
     
     return false
   }
+
+  #endif
 }
 
 /**  An option that accepts a string value. */
@@ -225,14 +283,29 @@ public class StringOption: Option {
     return _value != nil ? 1 : 0
   }
 
+  #if swift(>=3.0)
+
+  override func setValue(_ values: [String]) -> Bool {
+    if values.count == 0 {
+      return false
+    }
+
+    _value = values[0]
+    return true
+  }
+
+  #else
+
   override func setValue(values: [String]) -> Bool {
     if values.count == 0 {
       return false
     }
-    
+
     _value = values[0]
     return true
   }
+
+  #endif
 }
 
 /**  An option that accepts one or more string values. */
@@ -255,14 +328,29 @@ public class MultiStringOption: Option {
     return 0
   }
 
+  #if swift(>=3.0)
+
+  override func setValue(_ values: [String]) -> Bool {
+    if values.count == 0 {
+      return false
+    }
+
+    _value = values
+    return true
+  }
+
+  #else
+
   override func setValue(values: [String]) -> Bool {
     if values.count == 0 {
       return false
     }
-    
+
     _value = values
     return true
   }
+
+  #endif
 }
 
 /** An option that represents an enum value. */
@@ -303,6 +391,23 @@ public class EnumOption<T:RawRepresentable where T.RawValue == String>: Option {
     self.init(nil, longFlag as String?, required, helpMessage)
   }
   
+  #if swift(>=3.0)
+
+  override func setValue(_ values: [String]) -> Bool {
+    if values.count == 0 {
+      return false
+    }
+
+    if let v = T(rawValue: values[0]) {
+      _value = v
+      return true
+    }
+
+    return false
+  }
+
+  #else
+
   override func setValue(values: [String]) -> Bool {
     if values.count == 0 {
       return false
@@ -315,4 +420,6 @@ public class EnumOption<T:RawRepresentable where T.RawValue == String>: Option {
     
     return false
   }
+
+  #endif
 }

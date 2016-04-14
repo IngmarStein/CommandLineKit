@@ -40,7 +40,7 @@ let ArgumentAttacher: Character = "="
 #if swift(>=3.0)
   private struct StderrOutputStream: OutputStream {
     static let stream = StderrOutputStream()
-    func write(s: String) {
+    func write(_ s: String) {
       fputs(s, stderr)
     }
   }
@@ -232,6 +232,100 @@ public class CommandLine {
     setlocale(LC_ALL, "")
   }
   
+  #if swift(>=3.0)
+
+  /* Returns all argument values from flagIndex to the next flag or the end of the argument array. */
+  private func _getFlagValues(_ flagIndex: Int, _ attachedArg: String? = nil) -> [String] {
+    var args: [String] = [String]()
+    var skipFlagChecks = false
+
+    if let a = attachedArg {
+      args.append(a)
+    }
+
+    #if swift(>=3.0)
+      let range = stride(from: flagIndex + 1, to: _arguments.count, by :1)
+    #else
+      let range = (flagIndex + 1).stride(to: _arguments.count, by: 1)
+    #endif
+    for i in range {
+      if !skipFlagChecks {
+        if _arguments[i] == ArgumentStopper {
+          skipFlagChecks = true
+          continue
+        }
+
+        if _arguments[i].hasPrefix(ShortOptionPrefix) && Int(_arguments[i]) == nil &&
+          _arguments[i].toDouble() == nil {
+          break
+        }
+      }
+
+      args.append(_arguments[i])
+    }
+
+    return args
+  }
+
+  /**
+   * Adds an Option to the command line.
+   *
+   * - parameter option: The option to add.
+   */
+  public func addOption(_ option: Option) {
+    let uf = _usedFlags
+    for case let flag? in [option.shortFlag, option.longFlag] {
+      assert(!uf.contains(flag), "Flag '\(flag)' already in use")
+    }
+
+    _options.append(option)
+    _maxFlagDescriptionWidth = 0
+  }
+
+  /**
+   * Adds one or more Options to the command line.
+   *
+   * - parameter options: An array containing the options to add.
+   */
+  public func addOptions(_ options: [Option]) {
+    for o in options {
+      addOption(o)
+    }
+  }
+
+  /**
+   * Adds one or more Options to the command line.
+   *
+   * - parameter options: The options to add.
+   */
+  public func addOptions(_ options: Option...) {
+    for o in options {
+      addOption(o)
+    }
+  }
+
+  /**
+   * Sets the command line Options. Any existing options will be overwritten.
+   *
+   * - parameter options: An array containing the options to set.
+   */
+  public func setOptions(_ options: [Option]) {
+    _options = [Option]()
+    addOptions(options)
+  }
+
+  /**
+   * Sets the command line Options. Any existing options will be overwritten.
+   *
+   * - parameter options: The options to set.
+   */
+  public func setOptions(_ options: Option...) {
+    _options = [Option]()
+    addOptions(options)
+  }
+
+  #else
+
   /* Returns all argument values from flagIndex to the next flag or the end of the argument array. */
   private func _getFlagValues(flagIndex: Int, _ attachedArg: String? = nil) -> [String] {
     var args: [String] = [String]()
@@ -264,7 +358,7 @@ public class CommandLine {
     
     return args
   }
-  
+
   /**
    * Adds an Option to the command line.
    *
@@ -279,7 +373,7 @@ public class CommandLine {
     _options.append(option)
     _maxFlagDescriptionWidth = 0
   }
-  
+
   /**
    * Adds one or more Options to the command line.
    *
@@ -301,7 +395,7 @@ public class CommandLine {
       addOption(o)
     }
   }
-  
+
   /**
    * Sets the command line Options. Any existing options will be overwritten.
    *
@@ -322,6 +416,8 @@ public class CommandLine {
     addOptions(options)
   }
   
+  #endif
+
   /**
    * Parses command-line arguments into their matching Option values.
    *
@@ -477,7 +573,7 @@ public class CommandLine {
    * - parameter to: An OutputStreamType to write the error message to.
    */
   #if swift(>=3.0)
-    public func printUsage<TargetStream: OutputStream>(to: inout TargetStream) {
+    public func printUsage<TargetStream: OutputStream>(_ to: inout TargetStream) {
       /* Nil coalescing operator (??) doesn't work on closures :( */
       let format = formatOutput != nil ? formatOutput! : defaultFormat
 
@@ -512,7 +608,7 @@ public class CommandLine {
    * - parameter to: An OutputStreamType to write the error message to.
    */
   #if swift(>=3.0)
-    public func printUsage<TargetStream: OutputStream>(error: ErrorProtocol, to: inout TargetStream) {
+    public func printUsage<TargetStream: OutputStream>(_ error: ErrorProtocol, to: inout TargetStream) {
       let format = formatOutput != nil ? formatOutput! : defaultFormat
       print(format("\(error)", .Error), terminator: "", to: &to)
       printUsage(&to)
@@ -532,7 +628,7 @@ public class CommandLine {
    *   (e.g. "Missing required option --extract") will be printed before the usage message.
    */
   #if swift(>=3.0)
-    public func printUsage(error: ErrorProtocol) {
+    public func printUsage(_ error: ErrorProtocol) {
       var out = StderrOutputStream.stream
       printUsage(error, to: &out)
     }
