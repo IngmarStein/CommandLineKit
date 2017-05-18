@@ -316,9 +316,15 @@ public class CommandLine {
       }
 
       /* Remove attached argument from flag */
-      let splitFlag = flagWithArg.split(by: argumentAttacher, maxSplits: 1)
-      let flag = splitFlag[0]
-      let attachedArg: String? = splitFlag.count == 2 ? splitFlag[1] : nil
+      #if swift(>=4.0)
+        let splitFlag = flagWithArg.split(separator: argumentAttacher, maxSplits: 1)
+        let flag = String(splitFlag[0])
+        let attachedArg: String? = splitFlag.count == 2 ? String(splitFlag[1]) : nil
+      #else
+        let splitFlag = flagWithArg.split(by: argumentAttacher, maxSplits: 1)
+        let flag = splitFlag[0]
+        let attachedArg: String? = splitFlag.count == 2 ? splitFlag[1] : nil
+      #endif
 
       var flagMatched = false
       for option in _options where option.flagMatch(flag) {
