@@ -27,14 +27,11 @@ internal extension String {
    * using localeconv(3).
    */
   private func _localDecimalPoint() -> Character {
-    let locale = localeconv()
-    if locale != nil {
-      if let decimalPoint = locale?.pointee.decimal_point {
-        return Character(UnicodeScalar(UInt32(decimalPoint.pointee))!)
-      }
+    guard let locale = localeconv(), let decimalPoint = locale.pointee.decimal_point else {
+      return "."
     }
 
-    return "."
+    return Character(UnicodeScalar(UInt8(bitPattern: decimalPoint.pointee)))
   }
 
   /**
@@ -43,40 +40,10 @@ internal extension String {
    * - returns: A Double if the string can be parsed, nil otherwise.
    */
   func toDouble() -> Double? {
-    var characteristic: String = "0"
-    var mantissa: String = "0"
-    var inMantissa: Bool = false
-    var isNegative: Bool = false
-    let decimalPoint = self._localDecimalPoint()
-
-    let charactersEnumerator = self.characters.enumerated()
-    for (i, c) in charactersEnumerator {
-      if i == 0 && c == "-" {
-        isNegative = true
-        continue
-      }
-
-      if c == decimalPoint {
-        inMantissa = true
-        continue
-      }
-
-      if Int(String(c)) != nil {
-        if !inMantissa {
-          characteristic.append(c)
-        } else {
-          mantissa.append(c)
-        }
-      } else {
-        /* Non-numeric character found, bail */
-        return nil
-      }
-    }
-
-    let doubleCharacteristic = Double(Int(characteristic)!)
-    return (doubleCharacteristic +
-      Double(Int(mantissa)!) / pow(Double(10), Double(mantissa.characters.count - 1))) *
-      (isNegative ? -1 : 1)
+    let decimalPoint = String(self._localDecimalPoint())
+    guard decimalPoint == "." || self.range(of: ".") == nil else { return nil }
+    let localeSelf = self.replacingOccurrences(of: decimalPoint, with: ".")
+    return Double(localeSelf)
   }
 
   /**
