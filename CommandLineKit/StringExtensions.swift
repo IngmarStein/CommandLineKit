@@ -62,22 +62,14 @@ internal extension String {
     for i in self.characters.indices {
       let c = self[i]
       if c == by && (maxSplits == 0 || numSplits < maxSplits) {
-        #if swift(>=4.0)
-          s.append(String(self[curIdx..<i]))
-        #else
-          s.append(self[curIdx..<i])
-        #endif
+        s.append(String(self[curIdx..<i]))
         curIdx = self.index(after: i)
         numSplits += 1
       }
     }
 
     if curIdx != self.endIndex {
-      #if swift(>=4.0)
-        s.append(String(self[curIdx...]))
-      #else
-        s.append(self[curIdx..<self.endIndex])
-      #endif
+      s.append(String(self[curIdx...]))
     }
 
     return s
