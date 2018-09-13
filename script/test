@@ -8,6 +8,7 @@ if [ "$(uname)" != "Darwin" ]; then
   BUILD_PATH=".build-linux"
 fi
 
+apt-get update && apt-get -y install locales
 locale-gen sv_SE.UTF-8
 
 swift build -Xlinker -L/usr/local/lib --build-path $BUILD_PATH -v
