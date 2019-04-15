@@ -1,8 +1,8 @@
-# CommandLineKit [![Build Status](https://travis-ci.org/jatoben/CommandLine.svg?branch=master)](https://travis-ci.org/jatoben/CommandLine)
+# CommandLineKit [![Build Status](https://travis-ci.org/IngmarStein/CommandLine.svg?branch=master)](https://travis-ci.org/IngmarStein/CommandLine)
 
 A pure Swift library for creating command-line interfaces.
 
-*Note: CommandLineKit `master` requires Xcode 9 / Swift 4.0. If you're using older versions of Swift, please check out the [earlier releases](https://github.com/jatoben/CommandLine/releases).*
+*Note: CommandLineKit `master` requires Xcode 10.2 / Swift 5.0. If you're using older versions of Swift, please check out the [earlier releases](https://github.com/IngmarStein/CommandLine/releases).*
 
 ## Usage
 

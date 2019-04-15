@@ -1,3 +1,4 @@
+// swift-tools-version:4.0
 /*
  * Package.swift
  * Copyright (c) 2015 Ben Gollmer.
