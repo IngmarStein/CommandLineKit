@@ -20,7 +20,7 @@ import XCTest
 @testable import CommandLineKit
 
 internal class CommandLineTests: XCTestCase {
-  static var allTests : [(String, (CommandLineTests) -> () throws -> Void)] {
+  static var allTests: [(String, (CommandLineTests) -> () throws -> Void)] {
     return [
       ("testBoolOptions", testBoolOptions),
       ("testIntOptions", testIntOptions),
@@ -49,7 +49,7 @@ internal class CommandLineTests: XCTestCase {
       ("testPrintUsage", testPrintUsage),
       ("testPrintUsageError", testPrintUsageError),
       ("testPrintUsageToStderr", testPrintUsageToStderr),
-      ("testCustomOutputFormatter", testCustomOutputFormatter),
+      ("testCustomOutputFormatter", testCustomOutputFormatter)
     ]
   }
 
@@ -264,7 +264,6 @@ internal class CommandLineTests: XCTestCase {
       XCTFail("Unexpected parse error: \(error)")
     }
 
-
     /* No value */
     let g = DoubleOption(shortFlag: "g", longFlag: "g1", required: true, helpMessage: "")
     cli.setOptions(g)
@@ -459,7 +458,6 @@ internal class CommandLineTests: XCTestCase {
     let a = IntOption(shortFlag: "👻", longFlag: "👻", required: true, helpMessage: "")
     let b = StringOption(shortFlag: "👍", longFlag: "👍", required: true, helpMessage: "")
 
-
     cli.addOptions(a, b)
 
     do {
@@ -614,7 +612,7 @@ internal class CommandLineTests: XCTestCase {
       XCTAssertEqual(stringOpt.value, "John Q. Public", "Failed to get correct string value from mixed command line")
       XCTAssertEqual(intOpt.value, 45, "Failed to get correct int value from mixed command line")
       XCTAssertEqual(doubleOpt.value, 0.05, "Failed to get correct double value from mixed command line")
-      XCTAssertEqual(extraOpt.value?.count  , 3, "Failed to get correct number of multistring options from mixed command line")
+      XCTAssertEqual(extraOpt.value?.count, 3, "Failed to get correct number of multistring options from mixed command line")
     } catch {
       XCTFail("Failed to parse mixed command line: \(error)")
     }

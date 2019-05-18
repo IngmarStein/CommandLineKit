@@ -20,12 +20,12 @@ import XCTest
 @testable import CommandLineKit
 
 class StringExtensionTests: XCTestCase {
-  static var allTests : [(String, (StringExtensionTests) -> () throws -> Void)] {
+  static var allTests: [(String, (StringExtensionTests) -> () throws -> Void)] {
     return [
       ("testToDouble", testToDouble),
       ("testSplit", testSplit),
       ("testPadded", testPadded),
-      ("testWrapped", testWrapped),
+      ("testWrapped", testWrapped)
     ]
   }
 
@@ -49,7 +49,6 @@ class StringExtensionTests: XCTestCase {
     let d = "-2099".toDouble()
     XCTAssertEqual(d, -2099, "Failed to parse negative int as double")
 
-
     /* Zero handling */
     let e = "0.0".toDouble()
     XCTAssertEqual(e, 0, "Failed to parse zero double")
@@ -68,7 +67,6 @@ class StringExtensionTests: XCTestCase {
 
     let j = "-0.000000000000000".toDouble()
     XCTAssertEqual(j, 0, "Failed to parse very long negative zero double")
-
 
     /* Various extraneous chars */
     let k = "+42.3".toDouble()      // 4 Jan 2017: leading + is valid language syntax

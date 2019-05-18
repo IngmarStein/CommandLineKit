@@ -9,7 +9,7 @@ let package = Package(
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "CommandLineKit",
-            targets: ["CommandLineKit"]),
+            targets: ["CommandLineKit"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -23,7 +23,7 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "CommandLineKitTests",
-            dependencies: ["CommandLineKit"]),
+            dependencies: ["CommandLineKit"])
     ],
     swiftLanguageVersions: [.v4, .v4_2, .version("5")]
 )
