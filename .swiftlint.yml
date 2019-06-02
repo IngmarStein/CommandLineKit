@@ -1,0 +1,14 @@
+disabled_rules:
+  - line_length
+  - function_body_length
+  - type_body_length
+  - cyclomatic_complexity
+  - file_length
+  - nesting
+opt_in_rules:
+  - vertical_whitespace
+identifier_name:
+  min_length: 1
+  max_length: 40
+force_cast: warning
+force_try: warning
