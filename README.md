@@ -44,8 +44,7 @@ If you use CocoaPods, just add `pod 'CommandLineKit'` to your `Podfile`.
 
 If you are building a command-line tool and need to embed this and other frameworks to it, follow the steps in http://colemancda.github.io/2015/02/12/embedded-swift-frameworks-osx-command-line-tools/ to link Swift frameworks to your command-line tool.
 
-If you are building a standalone command-line tool, you'll need to add the CommandLineKit source files directly to your target, because Xcode [can't yet build static libraries that contain Swift code](https://github.com/ksm/SwiftInFlux#static-libraries).
-
+If you are building a standalone command-line tool, you'll need to use CommandLineKit as a static library which requires at least Xcode 9 beta 4.  If you use CocoaPods 1.5.0 or newer, this can be achieved by not specifying `use_frameworks!`.
 
 ## Features
 
